@@ -11,34 +11,26 @@ function App() {
 
   const handleOnSearchChange = (searchData) => {
     const [lat, lon] = searchData.value.split(' ')
-
     const currentWeatherFetch = fetch(
       `${WEATHER_API_URL}/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`
     )
 
     const forecastFetch = fetch(
-      `${WEATHER_API_URL}/forecast?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`
+      `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&units=metric&appid=a120d227b105aa9b6888ff0b3fbc86a5&exclude=hourly,minutely,alerts,current`
     )
 
-    Promise.all([currentWeatherFetch, forecastFetch]).then(async (response) => {
-      const weatherResponse = await response[0].json()
-      const forecastResponse = await response[1].json()
-      setCurrentWeather({ city: searchData.label, ...weatherResponse })
-      setForecast({ city: searchData.label, ...forecastResponse })
-    })
+    Promise.all([currentWeatherFetch, forecastFetch])
+      .then(async (responses) => {
+        const [currentWeatherResponse, forecastResponse] = responses
+        const weatherData = await currentWeatherResponse.json()
+        const forecastData = await forecastResponse.json()
 
-    //     Promise.all([currentWeatherFetch, forecastFetch])
-    //       .then(async (responses) => {
-    //         const [currentWeatherResponse, forecastResponse] = responses
-    //         const weatherData = await currentWeatherResponse.json()
-    //         const forecastData = await forecastResponse.json()
-    //
-    //         setCurrentWeather({ city: searchData.label, ...weatherData })
-    //         setForecast({ city: searchData.label, ...forecastData })
-    //       })
-    //       .catch((error) => {
-    //         console.error(error)
-    //       })
+        setCurrentWeather({ city: searchData.label, ...weatherData })
+        setForecast({ city: searchData.label, ...forecastData })
+      })
+      .catch((error) => {
+        console.error(error)
+      })
 
     console.log(currentWeather)
     console.log(forecast)
